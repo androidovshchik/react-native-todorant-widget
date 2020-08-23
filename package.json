@@ -1,0 +1,28 @@
+{
+  "name": "react-native-shared-preferences",
+  "version": "1.0.2",
+  "description": "Android's Native key value storage system in React Native",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/sriraman/react-native-shared-preferences.git"
+  },
+  "keywords": [
+    "React",
+    "Native",
+    "Shared",
+    "Preference",
+    "Android",
+    "react-component",
+    "react-native"
+  ],
+  "author": "Sriraman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sriraman/react-native-shared-preferences/issues"
+  },
+  "homepage": "https://github.com/sriraman/react-native-shared-preferences#readme"
+}
