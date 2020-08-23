@@ -27,6 +27,9 @@ DerivedData
 .gradle
 local.properties
 *.iml
+gradle
+gradlew
+gradlew.bat
 
 # Visual Studio Code
 #
