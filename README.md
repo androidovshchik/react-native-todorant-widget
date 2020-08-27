@@ -1,17 +1,11 @@
-# React Native Shared Preferences
+# React Native Todorant Widget
 
 Android's Native key value storage system in React Native
 
 ## Installation
 
-### < RN 0.47
 ```bash
-npm install react-native-shared-preferences@0.0.8 --save
-```
-
-### >= RN 0.47
-```bash
-npm install react-native-shared-preferences --save
+npm install react-native-todorant-widget --save
 ```
 
 ## Project setup and initialization
@@ -64,63 +58,21 @@ public class MainActivity extends ReactActivity {
 #### Import
 
 ```javascript
-var SharedPreferences = require('react-native-shared-preferences');
+var TodorantWidget = require('react-native-todorant-widget');
 ```
 
 #### Configure name of preferences file. (Optional. Must be called before other functions.)
 
 ```javascript
-SharedPreferences.setName("name");
+TodorantWidget.toggle(true);
 ```
 
 #### Set Item
 
 ```javascript
-SharedPreferences.setItem("key","value");
-```
-
-#### Get an value
-
-```javascript
-SharedPreferences.getItem("key", function(value){
-  console.log(value);
-});
-```
-
-#### Get multiple items
-
-```javascript
-SharedPreferences.getItems(["key1","key2"], function(values){
-  console.log(values)
-});
-```
-
-#### Get all values
-
-```javascript
-SharedPreferences.getAll(function(values){
-  console.log(values);
-});
-```
-
-#### Clear all values
-
-```javascript
-SharedPreferences.clear();
-```
-
-#### Get all keys - returns promise with array of keys
-```javascript
-SharedPreferences.getAllKeys(function(keys){
-  console.log(keys);
-});
-```
-
-#### Remove Item
-```javascript
-SharedPreferences.removeItem("key");
+TodorantWidget.forceUpdateAll();
 ```
 
 ## Credits
 
-[Sujith Niraikulathan](http://bit.ly/sujithkanna "Sujith").
+[Vlad Kalyuzhnyu](https://github.com/androidovshchik)
