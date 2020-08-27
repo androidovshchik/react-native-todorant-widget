@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widgetBackground">@color/widgetBackgroundNight</color>
+    <color name="widgetText">@color/widgetTextNight</color>
+    <color name="widgetPanel">@color/widgetPanelNight</color>
+</resources>

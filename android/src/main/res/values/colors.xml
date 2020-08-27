@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widgetBackground">@color/widgetBackgroundLight</color>
+    <color name="widgetBackgroundLight">@android:color/white</color>
+    <color name="widgetBackgroundNight">#070708</color>
+    <color name="widgetLineRed">#FF641A</color>
+    <color name="widgetLineGray">#33818c99</color>
+    <color name="widgetText">@color/widgetTextLight</color>
+    <color name="widgetTextLight">#e5141414</color>
+    <color name="widgetTextNight">#e5ffffff</color>
+    <color name="widgetPanel">@color/widgetPanelLight</color>
+    <color name="widgetPanelLight">#99EAF1FB</color>
+    <color name="widgetPanelNight">#15eaf1fb</color>
+    <color name="widgetIcon">#3366FF</color>
+</resources>
