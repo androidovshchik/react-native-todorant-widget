@@ -1,34 +1,30 @@
-# React Native Todorant Widget
+## React Native Todorant Widget
+> Todorant widget on Android
 
-Android's Native key value storage system in React Native
-
-## Installation
+### Installation
 
 ```bash
 npm install react-native-todorant-widget --save
 ```
 
-## Project setup and initialization
-
+### Project setup and initialization
 
 * In `android/settings.gradle`
 
 ```gradle
 ...
-include ':react-native-shared-preferences', ':app'
-project(':react-native-shared-preferences').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-shared-preferences/android')
+include ':react-native-todorant-widget', ':app'
+project(':react-native-todorant-widget').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-shared-preferences/android')
 ```
 
 * In `android/app/build.gradle`
 
 ```gradle
-...
 dependencies {
-    /* YOUR DEPENDENCIES HERE */
-    compile "com.facebook.react:react-native:+"
-    compile project(":react-native-shared-preferences") // <--- add this
+    ...
+    implementation project(":react-native-todorant-widget")
+    ...
 }
-
 ```
 
 * Register Module (in MainApplication.java)
@@ -53,26 +49,20 @@ public class MainActivity extends ReactActivity {
 ```
 
 
-## Usage
+### Usage
 
-#### Import
-
-```javascript
-var TodorantWidget = require('react-native-todorant-widget');
-```
-
-#### Configure name of preferences file. (Optional. Must be called before other functions.)
+Enable/disable widgets for user at all
 
 ```javascript
 TodorantWidget.toggle(true);
 ```
 
-#### Set Item
+Force update all widgets on user's home screen
 
 ```javascript
 TodorantWidget.forceUpdateAll();
 ```
 
-## Credits
+### Credits
 
 [Vlad Kalyuzhnyu](https://github.com/androidovshchik)
