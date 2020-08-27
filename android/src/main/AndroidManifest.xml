@@ -1,3 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="in.sriraman.sharedpreferences">
+    package="com.todorant.widget">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application>
+        <service
+            android:name=".ApiService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <receiver
+            android:name=".TodorantWidget"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider" />
+        </receiver>
+    </application>
 </manifest>

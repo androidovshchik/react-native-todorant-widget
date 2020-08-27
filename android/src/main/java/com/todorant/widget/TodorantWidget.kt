@@ -35,11 +35,6 @@ class TodorantWidget : AppWidgetProvider() {
             for (id in ids) {
                 updateWidget(id, hasToken, todo)
             }
-            if (hasToken && todo == null) {
-                if (hasActiveRequest.compareAndSet(false, true)) {
-                    ApiService.launch(applicationContext)
-                }
-            }
         }
     }
 
@@ -49,21 +44,11 @@ class TodorantWidget : AppWidgetProvider() {
         id: Int,
         newOptions: Bundle?
     ) {
-        with(context) {
-            val preferences =
-                getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
-            val hasToken = !preferences.getString(KEY_TOKEN, null).isNullOrBlank()
-            val todo = preferences.getString(KEY_TODO, null)?.let {
-                gson.fromJson(it, Todo::class.java)
-            }
-            Log.v(TAG, "onAppWidgetOptionsChanged $id $hasToken ${todo?.id}")
-            updateWidget(id, hasToken, todo)
-        }
+        onUpdate(context, manager, intArrayOf(id))
     }
 
     @UiThread
     override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
         val id = intent.getIntExtra(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
@@ -71,23 +56,30 @@ class TodorantWidget : AppWidgetProvider() {
         with(context) {
             when (val action = intent.action) {
                 ACTION_DONE, ACTION_DELETE, ACTION_SKIP, ACTION_REFRESH -> {
+                    Log.v(TAG, "onReceive $action $id")
                     if (hasActiveRequest.compareAndSet(false, true)) {
-                        Log.v(TAG, "Approving onReceive $action $id")
                         forceUpdateAll(applicationContext)
                         ApiService.launch(applicationContext, "action" to action)
-                    } else {
-                        Log.v(TAG, "Rejecting onReceive $action $id")
                     }
+                    return
                 }
                 ACTION_OPEN -> {
                     Log.v(TAG, "onReceive $action $id")
                     packageManager.getLaunchIntentForPackage(packageName)?.let {
                         startActivity(it.putExtra("widget_id", id).newTask())
                     }
+                    return
                 }
-                else -> Log.v(TAG, "onReceive $action $id")
+                AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {
+                    val force = intent.getBooleanExtra("force", false)
+                    Log.v(TAG, "onReceive APPWIDGET_UPDATE $id $force")
+                    if (!force && hasActiveRequest.compareAndSet(false, true)) {
+                        ApiService.launch(applicationContext)
+                    }
+                }
             }
         }
+        super.onReceive(context, intent)
     }
 
     companion object {
@@ -108,10 +100,13 @@ class TodorantWidget : AppWidgetProvider() {
         fun forceUpdateAll(context: Context) {
             with(context) {
                 val ids = appWidgetManager.getAppWidgetIds(widget)
-                sendBroadcast(intentFor<TodorantWidget>().apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                })
+                if (ids.isNotEmpty()) {
+                    sendBroadcast(intentFor<TodorantWidget>().apply {
+                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                        putExtra("force", true)
+                    })
+                }
             }
         }
 
@@ -125,6 +120,7 @@ class TodorantWidget : AppWidgetProvider() {
                     AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
                 }
             )
+            Log.v(TAG, "updateWidget $isPortrait")
             if (!hasToken || todo == null) {
                 appWidgetManager.updateAppWidget(
                     id,
@@ -144,8 +140,11 @@ class TodorantWidget : AppWidgetProvider() {
                     val allCount = todo.todosCount
                     val doneCount = allCount - todo.incompleteTodosCount
                     setTextViewText(R.id.tv_start, doneCount.toString())
-                    if (allCount == 0) {
-                        setBackgroundColor(R.id.iv_lines, getColorRes(R.color.widgetLineGray))
+                    if (allCount <= 1) {
+                        setBackgroundColor(
+                            R.id.iv_lines,
+                            getColorRes(if (doneCount <= 0) R.color.widgetLineGray else R.color.widgetLineRed)
+                        )
                         setImageViewResource(R.id.iv_lines, 0)
                     } else {
                         setBackgroundColor(R.id.iv_lines, Color.TRANSPARENT)

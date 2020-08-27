@@ -12,6 +12,9 @@ private val paint = Paint().apply {
     style = Paint.Style.STROKE
 }
 
+/**
+ * @param allCount >= 2
+ */
 fun Context.drawLines(widgetWidth: Int, allCount: Int, doneCount: Int): Bitmap {
     val red = getColorRes(R.color.widgetLineRed)
     val gray = getColorRes(R.color.widgetLineGray)
@@ -34,11 +37,11 @@ fun Context.drawLines(widgetWidth: Int, allCount: Int, doneCount: Int): Bitmap {
                 }
             } else {
                 val steps = allCount * 10 - 1
-                val spaceWidth = widgetWidth / steps.toFloat()
-                val stepWidth = spaceWidth * 10
+                val stepWidth = widgetWidth / steps.toFloat()
+                val lineWidth = stepWidth * 10
                 for (i in 1..allCount) {
                     paint.color = if (i <= doneCount) red else gray
-                    drawLine((i - 1) * stepWidth, h / 2, i * stepWidth - spaceWidth, h / 2, paint)
+                    drawLine((i - 1) * lineWidth, h / 2, i * lineWidth - stepWidth, h / 2, paint)
                 }
             }
         }
