@@ -4,11 +4,11 @@
 .gradle
 local.properties
 *.iml
-local.properties
-.idea/workspace.xml
-.idea/libraries
 build
 captures
+gradle
+gradlew
+gradlew.bat
 
 # node.js
 #
@@ -18,9 +18,7 @@ npm-debug.log
 # BUCK
 buck-out/
 \.buckd/
-android/app/libs
-android/keystores/debug.keystore
-
+*.keystore
 
 # OSX
 #
