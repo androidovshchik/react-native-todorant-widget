@@ -1,28 +1,25 @@
 {
-  "name": "react-native-shared-preferences",
-  "version": "1.0.2",
-  "description": "Android's Native key value storage system in React Native",
+  "name": "react-native-todorant-widget",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/sriraman/react-native-shared-preferences.git"
+    "url": "git+ssh://git@github.com/androidovshchik/react-native-todorant-widget.git"
   },
   "keywords": [
     "React",
     "Native",
-    "Shared",
-    "Preference",
+    "todorant",
+    "widget",
     "Android",
-    "react-component",
     "react-native"
   ],
-  "author": "Sriraman",
-  "license": "ISC",
+  "author": "Vlad Kalyuzhnyu",
   "bugs": {
-    "url": "https://github.com/sriraman/react-native-shared-preferences/issues"
+    "url": "https://github.com/androidovshchik/react-native-todorant-widget/issues"
   },
-  "homepage": "https://github.com/sriraman/react-native-shared-preferences#readme"
+  "homepage": "https://github.com/androidovshchik/react-native-todorant-widget#readme"
 }
