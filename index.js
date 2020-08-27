@@ -1,2 +1,5 @@
-var SharedPreferences = require('./SharedPreferences');
-module.exports = SharedPreferences;
+'use strict';
+
+var { NativeModules } = require('react-native');
+
+module.exports = NativeModules.TodorantWidget;
