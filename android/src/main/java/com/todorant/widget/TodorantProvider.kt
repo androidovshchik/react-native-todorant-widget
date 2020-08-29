@@ -99,7 +99,7 @@ class TodorantProvider : AppWidgetProvider() {
         /**
          * @param force if true also make http requests besides ui updates
          */
-        fun updateAll(context: Context, force: Boolean = false) {
+        fun updateAll(context: Context, force: Boolean) {
             with(context) {
                 val ids = appWidgetManager.getAppWidgetIds(widget)
                 if (ids.isNotEmpty()) {

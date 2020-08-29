@@ -60,7 +60,7 @@ class ApiService : JobIntentService() {
             Log.e(TAG, e.message, e)
         } finally {
             hasActiveRequest.set(false)
-            TodorantProvider.updateAll(applicationContext)
+            TodorantProvider.updateAll(applicationContext, false)
         }
     }
 

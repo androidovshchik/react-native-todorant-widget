@@ -5,10 +5,10 @@ import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
-class WidgetReactPackage : ReactPackage {
+class TodorantPackage : ReactPackage {
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(WidgetModule(reactContext))
+        return listOf(TodorantModule(reactContext))
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext) =
