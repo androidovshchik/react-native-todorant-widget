@@ -9,7 +9,7 @@ captures
 gradle
 gradlew
 gradlew.bat
-*.gradle
+/*.gradle
 gradle.properties
 
 # node.js
