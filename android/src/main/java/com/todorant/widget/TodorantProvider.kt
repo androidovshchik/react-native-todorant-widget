@@ -15,18 +15,16 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.UiThread
-import com.todorant.widget.api.Todo
 import com.todorant.widget.extensions.*
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.newTask
 
-class TodorantWidget : AppWidgetProvider() {
+class TodorantProvider : AppWidgetProvider() {
 
     @UiThread
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         with(context) {
-            val preferences =
-                getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
+            val preferences = getSharedPreferences(prefName, Context.MODE_PRIVATE)
             val hasToken = !preferences.getString(KEY_TOKEN, null).isNullOrBlank()
             val todo = preferences.getString(KEY_TODO, null)?.let {
                 gson.fromJson(it, Todo::class.java)
@@ -38,6 +36,7 @@ class TodorantWidget : AppWidgetProvider() {
         }
     }
 
+    @UiThread
     override fun onAppWidgetOptionsChanged(
         context: Context,
         manager: AppWidgetManager,
@@ -49,37 +48,37 @@ class TodorantWidget : AppWidgetProvider() {
 
     @UiThread
     override fun onReceive(context: Context, intent: Intent) {
-        val id = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        )
         with(context) {
             when (val action = intent.action) {
                 ACTION_DONE, ACTION_DELETE, ACTION_SKIP, ACTION_REFRESH -> {
-                    Log.v(TAG, "onReceive $action $id")
+                    Log.v(TAG, "onReceive $action")
                     if (hasActiveRequest.compareAndSet(false, true)) {
-                        forceUpdateAll(applicationContext)
+                        val ids = appWidgetManager.getAppWidgetIds(widget)
+                        if (ids.isNotEmpty()) {
+                            onUpdate(applicationContext, appWidgetManager, ids)
+                        }
                         ApiService.launch(applicationContext, "action" to action)
                     }
-                    return
                 }
                 ACTION_OPEN -> {
-                    Log.v(TAG, "onReceive $action $id")
+                    Log.v(TAG, "onReceive $action")
                     packageManager.getLaunchIntentForPackage(packageName)?.let {
-                        startActivity(it.putExtra("widget_id", id).newTask())
+                        startActivity(it.putExtra("widget", true).newTask())
                     }
-                    return
                 }
                 AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {
-                    val force = intent.getBooleanExtra("force", false)
-                    Log.v(TAG, "onReceive APPWIDGET_UPDATE $id $force")
-                    if (!force && hasActiveRequest.compareAndSet(false, true)) {
+                    val force = intent.getBooleanExtra("force", true)
+                    Log.v(TAG, "onReceive APPWIDGET_UPDATE $force")
+                    if (force && hasActiveRequest.compareAndSet(false, true)) {
+                        super.onReceive(context, intent)
                         ApiService.launch(applicationContext)
+                        return
                     }
                 }
+                else -> Log.v(TAG, "onReceive $action")
             }
+            super.onReceive(context, intent)
         }
-        super.onReceive(context, intent)
     }
 
     companion object {
@@ -87,7 +86,7 @@ class TodorantWidget : AppWidgetProvider() {
         private val noPrintRegex = "\\p{C}".toRegex()
 
         private val Context.widget: ComponentName
-            get() = ComponentName(applicationContext, TodorantWidget::class.java)
+            get() = ComponentName(applicationContext, TodorantProvider::class.java)
 
         fun toggle(context: Context, enable: Boolean) {
             context.packageManager.setComponentEnabledSetting(
@@ -97,14 +96,17 @@ class TodorantWidget : AppWidgetProvider() {
             )
         }
 
-        fun forceUpdateAll(context: Context) {
+        /**
+         * @param force if true also make http requests besides ui updates
+         */
+        fun updateAll(context: Context, force: Boolean = false) {
             with(context) {
                 val ids = appWidgetManager.getAppWidgetIds(widget)
                 if (ids.isNotEmpty()) {
-                    sendBroadcast(intentFor<TodorantWidget>().apply {
+                    sendBroadcast(intentFor<TodorantProvider>().apply {
                         action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                        putExtra("force", true)
+                        putExtra("force", force)
                     })
                 }
             }
@@ -121,14 +123,11 @@ class TodorantWidget : AppWidgetProvider() {
                 }
             )
             Log.v(TAG, "updateWidget $isPortrait")
-            if (!hasToken || todo == null) {
+            if (!hasToken) {
                 appWidgetManager.updateAppWidget(
                     id,
                     RemoteViews(packageName, R.layout.widget_message).apply {
-                        setTextViewText(
-                            R.id.tv_message,
-                            getString(if (!hasToken) R.string.widget_login else R.string.widget_loading)
-                        )
+                        setTextViewText(R.id.tv_message, getString(R.string.widget_login))
                         setOnClickPendingIntent(R.id.tv_message, getClickIntent(id, ACTION_OPEN))
                     }
                 )
@@ -137,8 +136,8 @@ class TodorantWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(
                 id,
                 RemoteViews(packageName, R.layout.widget_layout).apply {
-                    val allCount = todo.todosCount
-                    val doneCount = allCount - todo.incompleteTodosCount
+                    val allCount = todo?.todosCount ?: 0
+                    val doneCount = allCount - (todo?.incompleteTodosCount ?: 0)
                     setTextViewText(R.id.tv_start, doneCount.toString())
                     if (allCount <= 1) {
                         setBackgroundColor(
@@ -152,10 +151,14 @@ class TodorantWidget : AppWidgetProvider() {
                     }
                     setTextViewText(R.id.tv_end, allCount.toString())
                     setTextViewText(
-                        R.id.tv_text, todo.text?.replace("\n", "<br>")
-                            ?.replace(noPrintRegex, "")
-                            ?.replace("<br>", "\n")
-                            ?.formatLinks()
+                        R.id.tv_text, if (todo != null) {
+                            todo.text?.replace("\n", "<br>")
+                                ?.replace(noPrintRegex, "")
+                                ?.replace("<br>", "\n")
+                                ?.formatLinks()
+                        } else {
+                            getString(R.string.widget_loading)
+                        }
                     )
                     setOnClickPendingIntent(R.id.ib_done, getClickIntent(id, ACTION_DONE))
                     setOnClickPendingIntent(R.id.ib_delete, getClickIntent(id, ACTION_DELETE))
@@ -173,7 +176,7 @@ class TodorantWidget : AppWidgetProvider() {
                         R.id.ib_delete,
                         if (enablePanel) R.drawable.wg_delete else R.drawable.wg_delete_disabled
                     )
-                    if (!todo.frog && !todo.skipped) {
+                    if (todo == null || !todo.frog && !todo.skipped) {
                         setViewVisibility(R.id.ib_skip, View.VISIBLE)
                         toggle(R.id.ib_skip, enablePanel)
                         setImageViewResource(
@@ -193,7 +196,7 @@ class TodorantWidget : AppWidgetProvider() {
         }
 
         private fun Context.getClickIntent(widgetId: Int, action: String): PendingIntent {
-            return pendingReceiverFor(intentFor<TodorantWidget>().also {
+            return pendingReceiverFor(intentFor<TodorantProvider>().also {
                 it.action = action
                 it.data = Uri.parse(it.toUri(Intent.URI_INTENT_SCHEME))
                 it.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)

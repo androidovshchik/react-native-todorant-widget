@@ -1,6 +1,6 @@
 @file:Suppress("SpellCheckingInspection")
 
-package com.todorant.widget.api
+package com.todorant.widget
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName

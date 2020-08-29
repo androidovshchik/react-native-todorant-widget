@@ -6,7 +6,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.app.JobIntentService
-import com.todorant.widget.api.Todo
 import org.jetbrains.anko.intentFor
 
 class ApiService : JobIntentService() {
@@ -14,10 +13,10 @@ class ApiService : JobIntentService() {
     @WorkerThread
     @SuppressLint("ApplySharedPref")
     override fun onHandleWork(intent: Intent) {
-        val preferences =
-            getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
+        val preferences = getSharedPreferences(prefName, Context.MODE_PRIVATE)
         try {
-            val token = preferences.getString(KEY_TOKEN, null)!!
+            val token = preferences.getString(KEY_TOKEN, null)
+            require(!token.isNullOrBlank())
             val todoId = preferences.getString(KEY_TODO, null)?.let {
                 gson.fromJson(it, Todo::class.java).id
             }
@@ -56,11 +55,12 @@ class ApiService : JobIntentService() {
             preferences.edit()
                 .putString(KEY_TODO, gson.toJson(todo))
                 .commit()
+        } catch (ignored: IllegalArgumentException) {
         } catch (e: Throwable) {
             Log.e(TAG, e.message, e)
         } finally {
             hasActiveRequest.set(false)
-            TodorantWidget.forceUpdateAll(applicationContext)
+            TodorantProvider.updateAll(applicationContext)
         }
     }
 

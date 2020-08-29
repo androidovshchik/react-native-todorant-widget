@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.todorant.widget">
 
@@ -10,7 +11,7 @@
             android:name=".ApiService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <receiver
-            android:name=".TodorantWidget"
+            android:name=".TodorantProvider"
             android:label="@string/widget_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -20,4 +21,5 @@
                 android:resource="@xml/widget_provider" />
         </receiver>
     </application>
+
 </manifest>

@@ -1,6 +1,5 @@
 package com.todorant.widget
 
-import com.todorant.widget.api.TodoCurrent
 import retrofit2.Call
 import retrofit2.http.*
 import java.text.SimpleDateFormat

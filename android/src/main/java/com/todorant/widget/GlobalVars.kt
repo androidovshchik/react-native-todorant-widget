@@ -20,6 +20,9 @@ internal const val ACTION_OPEN = "action_open"
 
 internal const val TAG = "WIDGET_TAG"
 
+@Volatile
+var prefName = "wit_player_shared_preferences"
+
 val hasActiveRequest = AtomicBoolean(false)
 
 val gson: Gson = GsonBuilder()
