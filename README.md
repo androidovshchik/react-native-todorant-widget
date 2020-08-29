@@ -1,6 +1,10 @@
 ## React Native Todorant Widget
 > Todorant widget on Android
 
+<a href="https://www.npmjs.com/package/react-native-todorant-widget">
+  <img src="https://badge.fury.io/js/react-native-todorant-widget.png" height="18" alt="npm version">
+</a>
+
 ### Install
 
 ```bash

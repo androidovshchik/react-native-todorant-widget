@@ -22,6 +22,8 @@ internal const val TAG = "WIDGET_TAG"
 
 @Volatile
 var prefName = "wit_player_shared_preferences"
+@Volatile
+var appPackage = "com.todorant"
 
 val hasActiveRequest = AtomicBoolean(false)
 

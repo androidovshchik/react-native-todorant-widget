@@ -62,7 +62,7 @@ class TodorantProvider : AppWidgetProvider() {
                 }
                 ACTION_OPEN -> {
                     Log.v(TAG, "onReceive $action")
-                    packageManager.getLaunchIntentForPackage(packageName)?.let {
+                    packageManager.getLaunchIntentForPackage(appPackage)?.let {
                         startActivity(it.putExtra("widget", true).newTask())
                     }
                 }
