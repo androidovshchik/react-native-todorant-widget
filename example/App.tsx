@@ -9,7 +9,7 @@
  */
 
 import React, {Component} from 'react';
-import {Button, StyleSheet, TextInput, View,} from 'react-native';
+import {BackHandler, Button, StyleSheet, TextInput, View,} from 'react-native';
 import SharedPreferences from 'react-native-shared-preferences';
 import TodorantWidget from 'react-native-todorant-widget';
 
@@ -40,6 +40,7 @@ class App extends Component {
                         onPress={() => {
                             SharedPreferences.setItem('token', this.state.token)
                             TodorantWidget.forceUpdateAll()
+                            BackHandler.exitApp()
                         }}/>
                 </View>
                 <View style={styles.button}>
@@ -47,6 +48,7 @@ class App extends Component {
                         title="Force update"
                         onPress={() => {
                             TodorantWidget.forceUpdateAll()
+                            BackHandler.exitApp()
                         }}/>
                 </View>
             </View>
