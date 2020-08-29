@@ -44,20 +44,6 @@ class App extends Component {
                 </View>
                 <View style={styles.button}>
                     <Button
-                        title="Enable widgets"
-                        onPress={() => {
-                            TodorantWidget.toggle(true)
-                        }}/>
-                </View>
-                <View style={styles.button}>
-                    <Button
-                        title="Disable widgets"
-                        onPress={() => {
-                            TodorantWidget.toggle(false)
-                        }}/>
-                </View>
-                <View style={styles.button}>
-                    <Button
                         title="Force update"
                         onPress={() => {
                             TodorantWidget.forceUpdateAll()
