@@ -2,18 +2,18 @@ package com.todorant.widget
 
 import android.util.Base64
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.Cipher
-import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import kotlin.math.min
 
 /**
  * Conforming with CryptoJS AES method
  */
 // see https://gist.github.com/thackerronak/554c985c3001b16810af5fc0eb5c358f
+@Suppress("unused")
 object AESHelper {
 
     private const val KEY_SIZE = 256
@@ -30,13 +30,12 @@ object AESHelper {
      * @param password passphrase
      * @param plainText plain string
      */
-    @Throws(Exception::class)
     fun encrypt(password: String, plainText: String): String {
         val saltBytes = generateSalt(8)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
-        val keyS: SecretKey = SecretKeySpec(key, AES)
+        KDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        val keyS = SecretKeySpec(key, AES)
         val cipher = Cipher.getInstance(HASH_CIPHER)
         val ivSpec = IvParameterSpec(iv)
         cipher.init(Cipher.ENCRYPT_MODE, keyS, ivSpec)
@@ -48,8 +47,7 @@ object AESHelper {
         System.arraycopy(sBytes, 0, b, 0, sBytes.size)
         System.arraycopy(saltBytes, 0, b, sBytes.size, saltBytes.size)
         System.arraycopy(cipherText, 0, b, sBytes.size + saltBytes.size, cipherText.size)
-        val bEncode = Base64.encode(b, Base64.NO_WRAP)
-        return String(bEncode)
+        return Base64.encode(b, Base64.NO_WRAP).toString()
     }
 
     /**
@@ -58,23 +56,20 @@ object AESHelper {
      * @param password passphrase
      * @param cipherText encrypted string
      */
-    @Throws(Exception::class)
     fun decrypt(password: String, cipherText: String): String {
         val ctBytes = Base64.decode(cipherText.toByteArray(), Base64.NO_WRAP)
         val saltBytes = Arrays.copyOfRange(ctBytes, 8, 16)
-        val ciphertextBytes = Arrays.copyOfRange(ctBytes, 16, ctBytes.size)
+        val cipherTextBytes = Arrays.copyOfRange(ctBytes, 16, ctBytes.size)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        KDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
         val cipher = Cipher.getInstance(HASH_CIPHER)
-        val keyS: SecretKey = SecretKeySpec(key, AES)
+        val keyS = SecretKeySpec(key, AES)
         cipher.init(Cipher.DECRYPT_MODE, keyS, IvParameterSpec(iv))
-        val plainText = cipher.doFinal(ciphertextBytes)
-        return String(plainText)
+        return cipher.doFinal(cipherTextBytes).toString()
     }
 
-    @Throws(NoSuchAlgorithmException::class)
-    private fun EvpKDF(
+    private fun KDF(
         password: ByteArray,
         keySize: Int,
         ivSize: Int,
@@ -82,11 +77,10 @@ object AESHelper {
         resultKey: ByteArray,
         resultIv: ByteArray
     ): ByteArray {
-        return EvpKDF(password, keySize, ivSize, salt, 1, KDF_DIGEST, resultKey, resultIv)
+        return KDF(password, keySize, ivSize, salt, 1, KDF_DIGEST, resultKey, resultIv)
     }
 
-    @Throws(NoSuchAlgorithmException::class)
-    private fun EvpKDF(
+    private fun KDF(
         password: ByteArray,
         keySize: Int,
         ivSize: Int,
@@ -96,31 +90,28 @@ object AESHelper {
         resultKey: ByteArray,
         resultIv: ByteArray
     ): ByteArray {
-        var keySize = keySize
-        var ivSize = ivSize
-        keySize /= 32
-        ivSize /= 32
+        val keySize = keySize / 32
+        val ivSize = ivSize / 32
         val targetKeySize = keySize + ivSize
         val derivedBytes = ByteArray(targetKeySize * 4)
         var numberOfDerivedWords = 0
         var block: ByteArray? = null
-        val hasher = MessageDigest.getInstance(hashAlgorithm)
+        val hash = MessageDigest.getInstance(hashAlgorithm)
         while (numberOfDerivedWords < targetKeySize) {
             if (block != null) {
-                hasher.update(block)
+                hash.update(block)
             }
-            hasher.update(password)
-            block = hasher.digest(salt)
-            hasher.reset()
-
+            hash.update(password)
+            block = hash.digest(salt)
+            hash.reset()
             // Iterations
             for (i in 1 until iterations) {
-                block = hasher.digest(block)
-                hasher.reset()
+                block = hash.digest(block!!)
+                hash.reset()
             }
             System.arraycopy(
                 block!!, 0, derivedBytes, numberOfDerivedWords * 4,
-                Math.min(block.size, (targetKeySize - numberOfDerivedWords) * 4)
+                min(block.size, (targetKeySize - numberOfDerivedWords) * 4)
             )
             numberOfDerivedWords += block.size / 4
         }

@@ -16,13 +16,17 @@ import TodorantWidget from 'react-native-todorant-widget';
 class App extends Component {
 
     state = {
-        token: ''
+        token: '',
+        password: '',
     }
 
     constructor(props: any) {
         super(props)
         SharedPreferences.getItem("token", value => {
             this.setState({token: value})
+        })
+        SharedPreferences.getItem("password", value => {
+            this.setState({password: value})
         })
     }
 
@@ -34,11 +38,25 @@ class App extends Component {
                     placeholder="Type token"
                     onChangeText={value => this.setState({token: value})}
                     value={this.state.token}/>
+                <TextInput
+                    style={{height: 40, borderColor: 'gray', borderWidth: 1, margin: 16, marginTop: 0}}
+                    placeholder="Type password"
+                    onChangeText={value => this.setState({password: value})}
+                    value={this.state.password}/>
                 <View style={styles.button}>
                     <Button
                         title="Set token"
                         onPress={() => {
                             SharedPreferences.setItem('token', this.state.token)
+                            TodorantWidget.forceUpdateAll()
+                            BackHandler.exitApp()
+                        }}/>
+                </View>
+                <View style={styles.button}>
+                    <Button
+                        title="Set password"
+                        onPress={() => {
+                            SharedPreferences.setItem('password', this.state.password)
                             TodorantWidget.forceUpdateAll()
                             BackHandler.exitApp()
                         }}/>
