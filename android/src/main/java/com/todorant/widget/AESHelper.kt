@@ -1,58 +1,49 @@
 package com.todorant.widget
 
 import android.util.Base64
-import java.io.UnsupportedEncodingException
-import java.security.*
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.security.SecureRandom
 import java.util.*
-import javax.crypto.*
+import javax.crypto.Cipher
+import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- *
  * Conforming with CryptoJS AES method
- *
  */
+// see https://gist.github.com/thackerronak/554c985c3001b16810af5fc0eb5c358f
 object AESHelper {
 
-    private var KEY_SIZE = 256
-    private var IV_SIZE = 128
-    private var HASH_CIPHER = "AES/CBC/PKCS7Padding"
-    private var AES = "AES"
-    private var CHARSET_TYPE = "UTF-8"
-    private var KDF_DIGEST = "MD5"
+    private const val KEY_SIZE = 256
+    private const val IV_SIZE = 128
+    private const val HASH_CIPHER = "AES/CBC/PKCS7Padding"
+    private const val AES = "AES"
+    private const val KDF_DIGEST = "MD5"
 
     // Seriously crypto-js, what's wrong with you?
-    private var APPEND = "Salted__"
+    private const val APPEND = "Salted__"
 
     /**
      * Encrypt
      * @param password passphrase
      * @param plainText plain string
      */
-    @Throws(
-        UnsupportedEncodingException::class,
-        NoSuchAlgorithmException::class,
-        NoSuchPaddingException::class,
-        InvalidAlgorithmParameterException::class,
-        InvalidKeyException::class,
-        BadPaddingException::class,
-        IllegalBlockSizeException::class
-    )
+    @Throws(Exception::class)
     fun encrypt(password: String, plainText: String): String {
         val saltBytes = generateSalt(8)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        EvpKDF(password.toByteArray(charset(CHARSET_TYPE)), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
         val keyS: SecretKey = SecretKeySpec(key, AES)
         val cipher = Cipher.getInstance(HASH_CIPHER)
         val ivSpec = IvParameterSpec(iv)
         cipher.init(Cipher.ENCRYPT_MODE, keyS, ivSpec)
-        val cipherText = cipher.doFinal(plainText.toByteArray(charset(CHARSET_TYPE)))
-
+        val cipherText = cipher.doFinal(plainText.toByteArray())
         // Thanks kientux for this: https://gist.github.com/kientux/bb48259c6f2133e628ad
-        // Create CryptoJS-like encrypted !
-        val sBytes = APPEND.toByteArray(charset(CHARSET_TYPE))
+        // Create CryptoJS-like encrypted!
+        val sBytes = APPEND.toByteArray()
         val b = ByteArray(sBytes.size + saltBytes.size + cipherText.size)
         System.arraycopy(sBytes, 0, b, 0, sBytes.size)
         System.arraycopy(saltBytes, 0, b, sBytes.size, saltBytes.size)
@@ -67,22 +58,14 @@ object AESHelper {
      * @param password passphrase
      * @param cipherText encrypted string
      */
-    @Throws(
-        UnsupportedEncodingException::class,
-        NoSuchAlgorithmException::class,
-        NoSuchPaddingException::class,
-        InvalidAlgorithmParameterException::class,
-        InvalidKeyException::class,
-        BadPaddingException::class,
-        IllegalBlockSizeException::class
-    )
+    @Throws(Exception::class)
     fun decrypt(password: String, cipherText: String): String {
-        val ctBytes = Base64.decode(cipherText.toByteArray(charset(CHARSET_TYPE)), Base64.NO_WRAP)
+        val ctBytes = Base64.decode(cipherText.toByteArray(), Base64.NO_WRAP)
         val saltBytes = Arrays.copyOfRange(ctBytes, 8, 16)
         val ciphertextBytes = Arrays.copyOfRange(ctBytes, 16, ctBytes.size)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        EvpKDF(password.toByteArray(charset(CHARSET_TYPE)), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
         val cipher = Cipher.getInstance(HASH_CIPHER)
         val keyS: SecretKey = SecretKeySpec(key, AES)
         cipher.init(Cipher.DECRYPT_MODE, keyS, IvParameterSpec(iv))
@@ -115,8 +98,8 @@ object AESHelper {
     ): ByteArray {
         var keySize = keySize
         var ivSize = ivSize
-        keySize = keySize / 32
-        ivSize = ivSize / 32
+        keySize /= 32
+        ivSize /= 32
         val targetKeySize = keySize + ivSize
         val derivedBytes = ByteArray(targetKeySize * 4)
         var numberOfDerivedWords = 0
