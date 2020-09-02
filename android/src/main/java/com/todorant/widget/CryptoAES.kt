@@ -13,8 +13,8 @@ import kotlin.math.min
  * Conforming with CryptoJS AES method
  */
 // see https://gist.github.com/thackerronak/554c985c3001b16810af5fc0eb5c358f
-@Suppress("unused")
-object AESHelper {
+@Suppress("unused", "FunctionName")
+object CryptoAES {
 
     private const val KEY_SIZE = 256
     private const val IV_SIZE = 128
@@ -34,7 +34,7 @@ object AESHelper {
         val saltBytes = generateSalt(8)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        KDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
         val keyS = SecretKeySpec(key, AES)
         val cipher = Cipher.getInstance(HASH_CIPHER)
         val ivSpec = IvParameterSpec(iv)
@@ -47,7 +47,8 @@ object AESHelper {
         System.arraycopy(sBytes, 0, b, 0, sBytes.size)
         System.arraycopy(saltBytes, 0, b, sBytes.size, saltBytes.size)
         System.arraycopy(cipherText, 0, b, sBytes.size + saltBytes.size, cipherText.size)
-        return Base64.encode(b, Base64.NO_WRAP).toString()
+        val bEncode = Base64.encode(b, Base64.NO_WRAP)
+        return String(bEncode)
     }
 
     /**
@@ -62,14 +63,15 @@ object AESHelper {
         val cipherTextBytes = Arrays.copyOfRange(ctBytes, 16, ctBytes.size)
         val key = ByteArray(KEY_SIZE / 8)
         val iv = ByteArray(IV_SIZE / 8)
-        KDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
+        EvpKDF(password.toByteArray(), KEY_SIZE, IV_SIZE, saltBytes, key, iv)
         val cipher = Cipher.getInstance(HASH_CIPHER)
         val keyS = SecretKeySpec(key, AES)
         cipher.init(Cipher.DECRYPT_MODE, keyS, IvParameterSpec(iv))
-        return cipher.doFinal(cipherTextBytes).toString()
+        val plainText = cipher.doFinal(cipherTextBytes)
+        return String(plainText)
     }
 
-    private fun KDF(
+    private fun EvpKDF(
         password: ByteArray,
         keySize: Int,
         ivSize: Int,
@@ -77,10 +79,10 @@ object AESHelper {
         resultKey: ByteArray,
         resultIv: ByteArray
     ): ByteArray {
-        return KDF(password, keySize, ivSize, salt, 1, KDF_DIGEST, resultKey, resultIv)
+        return EvpKDF(password, keySize, ivSize, salt, 1, KDF_DIGEST, resultKey, resultIv)
     }
 
-    private fun KDF(
+    private fun EvpKDF(
         password: ByteArray,
         keySize: Int,
         ivSize: Int,

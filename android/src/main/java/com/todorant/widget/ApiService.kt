@@ -38,6 +38,17 @@ class ApiService : JobIntentService() {
                 todosCount = current.todosCount
                 incompleteTodosCount = current.incompleteTodosCount
                 if (!id.isNullOrBlank()) {
+                    if (encrypted == true) {
+                        val password = preferences.getString(KEY_PASSWORD, null)
+                        if (!password.isNullOrBlank()) {
+                            text = try {
+                                CryptoAES.decrypt(password, text.orEmpty())
+                            } catch (e: Throwable) {
+                                Log.e(TAG, e.message, e)
+                                "Invalid decryption password"
+                            }
+                        }
+                    }
                     time?.let {
                         text = "$it ${text.orEmpty()}"
                     }
