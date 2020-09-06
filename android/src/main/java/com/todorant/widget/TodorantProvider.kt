@@ -50,6 +50,7 @@ class TodorantProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         with(context) {
             when (val action = intent.action) {
+                ACTION_NONE -> return
                 ACTION_DONE, ACTION_DELETE, ACTION_SKIP, ACTION_REFRESH -> {
                     Log.v(TAG, "onReceive $action")
                     if (hasActiveRequest.compareAndSet(false, true)) {
@@ -150,35 +151,45 @@ class TodorantProvider : AppWidgetProvider() {
                         setImageViewBitmap(R.id.iv_lines, drawLines(width, allCount, doneCount))
                     }
                     setTextViewText(R.id.tv_end, allCount.toString())
-                    setTextViewText(
-                        R.id.tv_text, if (todo != null) {
+                    if (todo == null || todo.id.isNullOrBlank()) {
+                        setTextViewText(R.id.tv_text, if (todo != null) {
                             todo.text?.replace("\n", "<br>")
                                 ?.replace(noPrintRegex, "")
                                 ?.replace("<br>", "\n")
-                                ?.formatLinks()
                         } else {
                             getString(R.string.widget_loading)
-                        }
-                    )
+                        })
+                        setViewVisibility(R.id.ll_panel, View.GONE)
+                        setViewVisibility(R.id.ib_add, View.GONE)
+                        setOnClickPendingIntent(R.id.rl_layout, getClickIntent(id, ACTION_REFRESH))
+                        return@apply
+                    }
+                    setTextViewText(R.id.tv_text, todo.text?.replace("\n", "<br>")
+                        ?.replace(noPrintRegex, "")
+                        ?.replace("<br>", "\n")
+                        ?.formatLinks())
+                    setOnClickPendingIntent(R.id.rl_layout, getClickIntent(id, ACTION_NONE))
+                    setViewVisibility(R.id.ll_panel, View.VISIBLE)
                     setOnClickPendingIntent(R.id.ib_done, getClickIntent(id, ACTION_DONE))
                     setOnClickPendingIntent(R.id.ib_delete, getClickIntent(id, ACTION_DELETE))
                     setOnClickPendingIntent(R.id.ib_skip, getClickIntent(id, ACTION_SKIP))
                     setOnClickPendingIntent(R.id.ib_refresh, getClickIntent(id, ACTION_REFRESH))
+                    setViewVisibility(R.id.ib_add, View.VISIBLE)
                     setOnClickPendingIntent(R.id.ib_add, getClickIntent(id, ACTION_OPEN))
                     val enablePanel = !hasActiveRequest.get()
-                    toggle(R.id.ib_done, enablePanel)
+                    setEnabled(R.id.ib_done, enablePanel)
                     setImageViewResource(
                         R.id.ib_done,
                         if (enablePanel) R.drawable.wg_done else R.drawable.wg_done_disabled
                     )
-                    toggle(R.id.ib_delete, enablePanel)
+                    setEnabled(R.id.ib_delete, enablePanel)
                     setImageViewResource(
                         R.id.ib_delete,
                         if (enablePanel) R.drawable.wg_delete else R.drawable.wg_delete_disabled
                     )
-                    if (todo == null || !todo.frog && !todo.skipped) {
+                    if (!todo.frog && !todo.skipped) {
                         setViewVisibility(R.id.ib_skip, View.VISIBLE)
-                        toggle(R.id.ib_skip, enablePanel)
+                        setEnabled(R.id.ib_skip, enablePanel)
                         setImageViewResource(
                             R.id.ib_skip,
                             if (enablePanel) R.drawable.wg_arrow else R.drawable.wg_arrow_disabled
@@ -186,7 +197,7 @@ class TodorantProvider : AppWidgetProvider() {
                     } else {
                         setViewVisibility(R.id.ib_skip, View.GONE)
                     }
-                    toggle(R.id.ib_refresh, enablePanel)
+                    setEnabled(R.id.ib_refresh, enablePanel)
                     setImageViewResource(
                         R.id.ib_refresh,
                         if (enablePanel) R.drawable.wg_refresh else R.drawable.wg_refresh_disabled

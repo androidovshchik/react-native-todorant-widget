@@ -4,8 +4,8 @@ import android.widget.RemoteViews
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 
-fun RemoteViews.toggle(viewId: Int, enable: Boolean) {
-    setBoolean(viewId, "setEnabled", enable)
+fun RemoteViews.setEnabled(viewId: Int, enabled: Boolean) {
+    setBoolean(viewId, "setEnabled", enabled)
 }
 
 fun RemoteViews.setBackgroundColor(viewId: Int, @ColorInt value: Int) {
