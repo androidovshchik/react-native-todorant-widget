@@ -1,6 +1,6 @@
 {
   "name": "react-native-todorant-widget",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Todorant widget on Android",
   "main": "index.js",
   "types": "index.d.ts",
