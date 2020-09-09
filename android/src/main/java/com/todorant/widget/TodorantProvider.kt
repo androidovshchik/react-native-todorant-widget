@@ -127,16 +127,17 @@ class TodorantProvider : AppWidgetProvider() {
             if (!hasToken) {
                 appWidgetManager.updateAppWidget(
                     id,
-                    RemoteViews(packageName, R.layout.widget_message).apply {
+                    RemoteViews(packageName, R.layout.widget_error).apply {
                         setTextViewText(R.id.tv_message, getString(R.string.widget_login))
                         setOnClickPendingIntent(R.id.tv_message, getClickIntent(id, ACTION_OPEN))
                     }
                 )
                 return
             }
+            val hasTodo = !todo?.id.isNullOrBlank()
             appWidgetManager.updateAppWidget(
                 id,
-                RemoteViews(packageName, R.layout.widget_layout).apply {
+                RemoteViews(packageName, if (hasTodo) R.layout.widget_layout else R.layout.widget_message).apply {
                     val allCount = todo?.todosCount ?: 0
                     val doneCount = allCount - (todo?.incompleteTodosCount ?: 0)
                     setTextViewText(R.id.tv_start, doneCount.toString())
@@ -151,7 +152,7 @@ class TodorantProvider : AppWidgetProvider() {
                         setImageViewBitmap(R.id.iv_lines, drawLines(width, allCount, doneCount))
                     }
                     setTextViewText(R.id.tv_end, allCount.toString())
-                    if (todo == null || todo.id.isNullOrBlank()) {
+                    if (!hasTodo) {
                         setTextViewText(R.id.tv_text, if (todo != null) {
                             todo.text?.replace("\n", "<br>")
                                 ?.replace(noPrintRegex, "")
@@ -159,22 +160,17 @@ class TodorantProvider : AppWidgetProvider() {
                         } else {
                             getString(R.string.widget_loading)
                         })
-                        setViewVisibility(R.id.ll_panel, View.GONE)
-                        setViewVisibility(R.id.ib_add, View.GONE)
-                        setOnClickPendingIntent(R.id.rl_layout, getClickIntent(id, ACTION_REFRESH))
+                        setOnClickPendingIntent(R.id.rl_message, getClickIntent(id, ACTION_REFRESH))
                         return@apply
                     }
-                    setTextViewText(R.id.tv_text, todo.text?.replace("\n", "<br>")
+                    setTextViewText(R.id.tv_text, todo!!.text?.replace("\n", "<br>")
                         ?.replace(noPrintRegex, "")
                         ?.replace("<br>", "\n")
                         ?.formatLinks())
-                    setOnClickPendingIntent(R.id.rl_layout, getClickIntent(id, ACTION_NONE))
-                    setViewVisibility(R.id.ll_panel, View.VISIBLE)
                     setOnClickPendingIntent(R.id.ib_done, getClickIntent(id, ACTION_DONE))
                     setOnClickPendingIntent(R.id.ib_delete, getClickIntent(id, ACTION_DELETE))
                     setOnClickPendingIntent(R.id.ib_skip, getClickIntent(id, ACTION_SKIP))
                     setOnClickPendingIntent(R.id.ib_refresh, getClickIntent(id, ACTION_REFRESH))
-                    setViewVisibility(R.id.ib_add, View.VISIBLE)
                     setOnClickPendingIntent(R.id.ib_add, getClickIntent(id, ACTION_OPEN))
                     val enablePanel = !hasActiveRequest.get()
                     setEnabled(R.id.ib_done, enablePanel)
