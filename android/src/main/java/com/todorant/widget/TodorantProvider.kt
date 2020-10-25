@@ -11,6 +11,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -64,7 +65,11 @@ class TodorantProvider : AppWidgetProvider() {
                 ACTION_OPEN -> {
                     Log.v(TAG, "onReceive $action")
                     packageManager.getLaunchIntentForPackage(appPackage)?.let {
-                        startActivity(it.putExtra("widget", true).newTask())
+                        startActivity(
+                            it.putExtra("widget", true)
+                                .putExtra("time", SystemClock.elapsedRealtime())
+                                .newTask()
+                        )
                     }
                 }
                 AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {
