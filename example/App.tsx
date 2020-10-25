@@ -9,7 +9,7 @@
  */
 
 import React, {Component} from 'react';
-import {BackHandler, Button, StyleSheet, TextInput, ToastAndroid, View,} from 'react-native';
+import {AppState, AppStateStatus, BackHandler, Button, StyleSheet, TextInput, ToastAndroid, View,} from 'react-native';
 import SharedPreferences from 'react-native-shared-preferences';
 import TodorantWidget from 'react-native-todorant-widget';
 
@@ -18,6 +18,7 @@ class App extends Component {
     state = {
         token: '',
         password: '',
+        appState: AppState.currentState
     }
 
     constructor(props: any) {
@@ -29,6 +30,22 @@ class App extends Component {
             this.setState({password: value})
         })
     }
+
+    componentDidMount() {
+        AppState.addEventListener("change", this._handleAppStateChange);
+    }
+
+    componentWillUnmount() {
+        AppState.removeEventListener("change", this._handleAppStateChange);
+    }
+
+    private _handleAppStateChange = (nextAppState: AppStateStatus) => {
+        console.log(`nextAppState=${nextAppState}`);
+        this.setState({appState: nextAppState});
+        TodorantWidget.getNewArgs((args?: object) => {
+            console.log(`args=${JSON.stringify(args)}`);
+        })
+    };
 
     render() {
         // see https://github.com/androidovshchik/react-native-todorant-widget/blob/master/example/android/app/src/main/java/com/todorant/example/MainActivity.kt
