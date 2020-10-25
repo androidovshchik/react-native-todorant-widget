@@ -64,12 +64,14 @@ class TodorantProvider : AppWidgetProvider() {
                 }
                 ACTION_OPEN -> {
                     Log.v(TAG, "onReceive $action")
-                    packageManager.getLaunchIntentForPackage(appPackage)?.let {
-                        startActivity(
-                            it.putExtra("widget", true)
-                                .putExtra("time", SystemClock.elapsedRealtime())
-                                .newTask()
-                        )
+                    val mainIntent = Intent().apply {
+                        setClassName(appPackage, "$appPackage.MainActivity")
+                        putExtra("widget", true)
+                        putExtra("time", SystemClock.elapsedRealtime())
+                        newTask()
+                    }
+                    if (mainIntent.resolveActivity(packageManager) != null) {
+                        startActivity(mainIntent)
                     }
                 }
                 AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {
