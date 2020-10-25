@@ -9,7 +9,7 @@
  */
 
 import React, {Component} from 'react';
-import {BackHandler, Button, StyleSheet, TextInput, View,} from 'react-native';
+import {BackHandler, Button, StyleSheet, TextInput, ToastAndroid, View,} from 'react-native';
 import SharedPreferences from 'react-native-shared-preferences';
 import TodorantWidget from 'react-native-todorant-widget';
 
@@ -31,6 +31,8 @@ class App extends Component {
     }
 
     render() {
+        // see https://github.com/androidovshchik/react-native-todorant-widget/blob/master/example/android/app/src/main/java/com/todorant/example/MainActivity.kt
+        ToastAndroid.show(JSON.stringify(this.props, null, 2), ToastAndroid.LONG);
         return (
             <View style={styles.container}>
                 <TextInput
@@ -67,6 +69,15 @@ class App extends Component {
                         onPress={() => {
                             TodorantWidget.forceUpdateAll()
                             BackHandler.exitApp()
+                        }}/>
+                </View>
+                <View style={styles.button}>
+                    <Button
+                        title="Get new args"
+                        onPress={() => {
+                            TodorantWidget.getNewArgs((args?: object) => {
+                                ToastAndroid.show(JSON.stringify(args, null, 2), ToastAndroid.LONG);
+                            })
                         }}/>
                 </View>
             </View>
