@@ -200,7 +200,7 @@ class TodorantProvider : AppWidgetProvider() {
                         R.id.ib_delete,
                         if (enablePanel) R.drawable.wg_delete else R.drawable.wg_delete_disabled
                     )
-                    if (!todo.frog && !todo.skipped) {
+                    if (!todo.frog) {
                         setViewVisibility(R.id.ib_skip, View.VISIBLE)
                         setEnabled(R.id.ib_skip, enablePanel)
                         setImageViewResource(
