@@ -33,7 +33,11 @@ class TodorantModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     @ReactMethod
     fun getNewArgs(callback: Callback) {
         val args = args ?: currentActivity?.intent?.extras
-        callback.invoke(if (args != null) Arguments.fromBundle(args) else null)
+        try {
+         callback.invoke(if (args != null) Arguments.fromBundle(args) else null)
+        } catch (e: Throwable) {
+            // Do nothing
+        }
     }
 
     override fun onActivityResult(

@@ -62,13 +62,22 @@ class TodorantProvider : AppWidgetProvider() {
                         ApiService.launch(applicationContext, "action" to action)
                     }
                 }
-                ACTION_OPEN -> {
+                ACTION_ADD_OPEN -> {
                     Log.v(TAG, "onReceive $action")
                     val mainIntent = Intent().apply {
                         setClassName(appPackage, "$appPackage.MainActivity")
                         putExtra("widget", true)
                         putExtra("time", SystemClock.elapsedRealtime())
                         newTask()
+                    }
+                    if (mainIntent.resolveActivity(packageManager) != null) {
+                        startActivity(mainIntent)
+                    }
+                }
+                ACTION_OPEN -> {
+                    Log.v(TAG, "onReceive $action")
+                    val mainIntent = Intent().apply {
+                        setClassName(appPackage, "$appPackage.MainActivity")
                     }
                     if (mainIntent.resolveActivity(packageManager) != null) {
                         startActivity(mainIntent)
@@ -136,7 +145,7 @@ class TodorantProvider : AppWidgetProvider() {
                     id,
                     RemoteViews(packageName, R.layout.widget_error).apply {
                         setTextViewText(R.id.tv_message, getString(R.string.widget_login))
-                        setOnClickPendingIntent(R.id.tv_message, getClickIntent(id, ACTION_OPEN))
+                        setOnClickPendingIntent(R.id.tv_message, getClickIntent(id, ACTION_ADD_OPEN))
                     }
                 )
                 return
@@ -148,6 +157,7 @@ class TodorantProvider : AppWidgetProvider() {
                     val allCount = todo?.todosCount ?: 0
                     val doneCount = allCount - (todo?.incompleteTodosCount ?: 0)
                     setTextViewText(R.id.tv_start, doneCount.toString())
+                    setOnClickPendingIntent(R.id.rl_layout, getClickIntent(id, ACTION_OPEN))
                     if (allCount <= 1) {
                         setBackgroundColor(
                             R.id.iv_lines,
@@ -178,7 +188,7 @@ class TodorantProvider : AppWidgetProvider() {
                     setOnClickPendingIntent(R.id.ib_delete, getClickIntent(id, ACTION_DELETE))
                     setOnClickPendingIntent(R.id.ib_skip, getClickIntent(id, ACTION_SKIP))
                     setOnClickPendingIntent(R.id.ib_refresh, getClickIntent(id, ACTION_REFRESH))
-                    setOnClickPendingIntent(R.id.ib_add, getClickIntent(id, ACTION_OPEN))
+                    setOnClickPendingIntent(R.id.ib_add, getClickIntent(id, ACTION_ADD_OPEN))
                     val enablePanel = !hasActiveRequest.get()
                     setEnabled(R.id.ib_done, enablePanel)
                     setImageViewResource(
@@ -190,7 +200,7 @@ class TodorantProvider : AppWidgetProvider() {
                         R.id.ib_delete,
                         if (enablePanel) R.drawable.wg_delete else R.drawable.wg_delete_disabled
                     )
-                    if (!todo.frog && !todo.skipped) {
+                    if (!todo.frog) {
                         setViewVisibility(R.id.ib_skip, View.VISIBLE)
                         setEnabled(R.id.ib_skip, enablePanel)
                         setImageViewResource(

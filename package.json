@@ -1,6 +1,6 @@
 {
-  "name": "react-native-todorant-widget",
-  "version": "0.1.4",
+  "name": "@upacyxou/react-native-todorant-widget",
+  "version": "0.3.0-beta.1",
   "description": "Todorant widget on Android",
   "main": "index.js",
   "types": "index.d.ts",
@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/androidovshchik/react-native-todorant-widget/issues"
   },
-  "homepage": "https://github.com/androidovshchik/react-native-todorant-widget#readme"
+  "homepage": "https://github.com/androidovshchik/react-native-todorant-widget#readme",
+  "directories": {
+    "example": "example"
+  },
+  "license": "ISC"
 }

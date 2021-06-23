@@ -21,6 +21,7 @@ internal const val ACTION_DONE = "action_done"
 internal const val ACTION_DELETE = "action_delete"
 internal const val ACTION_SKIP = "action_skip"
 internal const val ACTION_REFRESH = "action_refresh"
+internal const val ACTION_ADD_OPEN = "action_add_open"
 internal const val ACTION_OPEN = "action_open"
 
 internal const val TAG = "WIDGET_TAG"
