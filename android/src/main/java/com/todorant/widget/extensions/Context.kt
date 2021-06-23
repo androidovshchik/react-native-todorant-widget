@@ -21,14 +21,14 @@ fun Context.getColorRes(@ColorRes id: Int): Int {
 
 inline fun <reified T : Activity> Context.pendingActivityFor(
     requestCode: Int = 0,
-    flags: Int = PendingIntent.FLAG_UPDATE_CURRENT,
+    flags: Int = PendingIntent.FLAG_IMMUTABLE,
     vararg params: Pair<String, Any?>
 ): PendingIntent =
     PendingIntent.getActivity(applicationContext, requestCode, intentFor<T>(*params), flags)
 
 inline fun <reified T : BroadcastReceiver> Context.pendingReceiverFor(
     requestCode: Int = 0,
-    flags: Int = PendingIntent.FLAG_UPDATE_CURRENT,
+    flags: Int = PendingIntent.FLAG_IMMUTABLE,
     vararg params: Pair<String, Any?>
 ): PendingIntent =
     PendingIntent.getBroadcast(applicationContext, requestCode, intentFor<T>(*params), flags)
@@ -36,13 +36,13 @@ inline fun <reified T : BroadcastReceiver> Context.pendingReceiverFor(
 fun Context.pendingReceiverFor(
     action: String,
     requestCode: Int = 0,
-    flags: Int = PendingIntent.FLAG_UPDATE_CURRENT
+    flags: Int = PendingIntent.FLAG_IMMUTABLE
 ): PendingIntent =
     PendingIntent.getBroadcast(applicationContext, requestCode, Intent(action), flags)
 
 fun Context.pendingReceiverFor(
     intent: Intent,
     requestCode: Int = 0,
-    flags: Int = PendingIntent.FLAG_UPDATE_CURRENT
+    flags: Int = PendingIntent.FLAG_IMMUTABLE
 ): PendingIntent =
     PendingIntent.getBroadcast(applicationContext, requestCode, intent, flags)
